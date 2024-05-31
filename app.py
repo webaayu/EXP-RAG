@@ -2,7 +2,7 @@ import streamlit as st
 import zipfile
 import os
 import tempfile
-from langchain.llms import Llama3
+from langchain_community.llms import Llama3
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import Chroma
