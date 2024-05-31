@@ -2,7 +2,7 @@ import streamlit as st
 import zipfile
 import os
 import tempfile
-from langchain_community.llms import Llama3
+from langchain_community.llms import Ollama
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import Chroma
@@ -24,7 +24,7 @@ else:
     collection = chroma_client.get_collection(collection_name)
 
 # Load models
-llama_model = Llama3(model_name="llama-3b")
+llama_model = Ollama(model_name="llama3")
 embedding_model = HuggingFaceEmbeddings()
 
 # Define the Streamlit app
