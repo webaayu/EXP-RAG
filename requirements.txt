@@ -1,0 +1,5 @@
+streamlit
+chromadb
+langchain
+huggingface-hub
+magic
