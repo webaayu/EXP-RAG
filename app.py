@@ -2,18 +2,26 @@ import streamlit as st
 import zipfile
 import os
 import tempfile
-import magic
-from chromadb import Client
-from chromadb.config import Settings
-from chromadb.utils import get_embedding_function, get_index
 from langchain.llms import Llama3
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.vectorstores import Chroma
+from langchain_community.text_splitter import PlainTextExtractor
+from chromadb.config import Settings
 
-# Connect to Chroma DB
-chroma_client = Client(Settings())
+# Connect to Chroma DB with SQLite
+settings = Settings(
+    chroma_db_impl="sqlite",
+    sqlite_db_path="chroma_db.sqlite"
+)
+chroma_client = Chroma(client_settings=settings)
 collection_name = "text_collection"
-collection = chroma_client.get_or_create_collection(name=collection_name)
+
+# Create or get the Chroma collection
+if collection_name not in chroma_client.list_collections():
+    collection = chroma_client.create_collection(collection_name)
+else:
+    collection = chroma_client.get_collection(collection_name)
 
 # Load models
 llama_model = Llama3(model_name="llama-3b")
@@ -39,12 +47,12 @@ def main():
                 st.write(file)
 
             all_texts = []
+            text_extractor = PlainTextExtractor()
             for file in extracted_files:
                 file_path = os.path.join(tmp_dir, file)
-                mime = magic.Magic(mime=True)
-                if mime.from_file(file_path).startswith("text"):
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        all_texts.append(f.read())
+                extracted_text = text_extractor.extract(file_path)
+                if extracted_text:
+                    all_texts.append(extracted_text)
 
             st.write("Processing texts...")
             text_splitter = CharacterTextSplitter()
@@ -53,13 +61,13 @@ def main():
             st.write("Generating embeddings and storing in Chroma DB...")
             embeddings = embedding_model.encode(texts)
             for i, embedding in enumerate(embeddings):
-                collection.add(embedding=embedding, id=str(i), metadata={"text": texts[i]})
+                collection.add(embedding=embedding, document_id=str(i), document_metadata={"text": texts[i]})
 
             query = st.text_input("Enter your query:")
             if query:
                 query_embedding = embedding_model.encode([query])[0]
-                results = collection.query(embedding=query_embedding, top_k=5)
-                relevant_texts = [result['metadata']['text'] for result in results]
+                results = collection.search(embedding=query_embedding, top_k=5)
+                relevant_texts = [result['document_metadata']['text'] for result in results]
 
                 st.write("Generating content based on relevant texts...")
                 response = llama_model(relevant_texts)
