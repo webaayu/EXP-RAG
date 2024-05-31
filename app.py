@@ -3,7 +3,7 @@ import zipfile
 import os
 import tempfile
 from langchain_community.llms import Ollama
-from langchain.text_splitter import CharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import Chroma
 from langchain_community.text_splitter import PlainTextExtractor
@@ -55,7 +55,7 @@ def main():
                     all_texts.append(extracted_text)
 
             st.write("Processing texts...")
-            text_splitter = CharacterTextSplitter()
+            text_splitter = RecursiveCharacterTextSplitterr()
             texts = text_splitter.split_texts(all_texts)
 
             st.write("Generating embeddings and storing in Chroma DB...")
