@@ -3,3 +3,4 @@ chromadb
 langchain
 huggingface-hub
 langchain_community
+langchain_text_splitters
