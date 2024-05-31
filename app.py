@@ -6,7 +6,6 @@ from langchain_community.llms import Ollama
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import Chroma
-from langchain_community.text_splitter import PlainTextExtractor
 from chromadb.config import Settings
 
 # Connect to Chroma DB with SQLite
@@ -47,7 +46,7 @@ def main():
                 st.write(file)
 
             all_texts = []
-            text_extractor = PlainTextExtractor()
+            text_extractor = RecursiveCharacterTextSplitter()
             for file in extracted_files:
                 file_path = os.path.join(tmp_dir, file)
                 extracted_text = text_extractor.extract(file_path)
@@ -55,7 +54,7 @@ def main():
                     all_texts.append(extracted_text)
 
             st.write("Processing texts...")
-            text_splitter = RecursiveCharacterTextSplitterr()
+            text_splitter = RecursiveCharacterTextSplitter()
             texts = text_splitter.split_texts(all_texts)
 
             st.write("Generating embeddings and storing in Chroma DB...")
